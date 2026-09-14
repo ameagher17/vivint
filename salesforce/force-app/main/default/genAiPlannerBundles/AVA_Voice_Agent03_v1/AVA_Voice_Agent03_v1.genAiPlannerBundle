@@ -23,6 +23,9 @@
         <genAiPluginName>Pet_Policy_Compliance_16jfj000002xXoP</genAiPluginName>
     </localTopicLinks>
     <localTopicLinks>
+        <genAiPluginName>Smart_Hub_Troubleshooting_16jfj000002xXoP</genAiPluginName>
+    </localTopicLinks>
+    <localTopicLinks>
         <genAiPluginName>agent_router_16jfj000002xXoP</genAiPluginName>
     </localTopicLinks>
     <localTopicLinks>
@@ -1972,6 +1975,59 @@ Flow of the conversation should be:
         <language>en_US</language>
         <localDeveloperName>agent_router</localDeveloperName>
         <masterLabel>Agent Router</masterLabel>
+        <pluginType>Topic</pluginType>
+    </localTopics>
+    <localTopics>
+        <fullName>Smart_Hub_Troubleshooting_16jfj000002xXoP</fullName>
+        <canEscalate>false</canEscalate>
+        <description>Handles customer reports that their Smart Hub panel isn&apos;t working, is unresponsive, offline, or frozen, or explicit requests for a reboot. The only remote fix available is a Smart Hub reboot; if it can&apos;t be resolved remotely, escalate to a live agent.</description>
+        <developerName>Smart_Hub_Troubleshooting_16jfj000002xXoP</developerName>
+        <genAiPluginInstructions>
+            <description>Keep responses short and conversational, with exactly one question per turn. The only troubleshooting you can perform is a remote Smart Hub reboot. Never disclose internal IDs, action names, or the raw reboot status value.
+
+If a reboot has not yet been offered, ask the customer exactly: &quot;I can try rebooting your Smart Hub panel remotely — that usually takes about a minute, and your security monitoring will be briefly offline while it restarts. Want me to go ahead?&quot; and say nothing else.
+
+If the customer agrees, invoke Run Smart Hub Reboot and say nothing else. If they decline or ask for a person instead, say: &quot;No problem, let me get you connected with a live agent who can help.&quot; and escalate.
+
+After a reboot attempt, relay the result: on success, ask once if everything is working now; if the customer confirms, mark the issue resolved and ask if there is anything else you can help with. If the customer says it is still not working after a successful reboot, or if both reboot attempts fail, escalate to a live agent.</description>
+            <developerName>instruction0_179fj0000047Gtu</developerName>
+            <language>en_US</language>
+            <masterLabel>instruction0_179fj0000047Gtu</masterLabel>
+            <sortOrder>1</sortOrder>
+        </genAiPluginInstructions>
+        <language>en_US</language>
+        <localActionLinks>
+            <functionName>Retry_Smart_Hub_Reboot_179fj0000047Gtu</functionName>
+        </localActionLinks>
+        <localActionLinks>
+            <functionName>Run_Smart_Hub_Reboot_179fj0000047Gtu</functionName>
+        </localActionLinks>
+        <localActions>
+            <fullName>Run_Smart_Hub_Reboot_179fj0000047Gtu</fullName>
+            <description>Connects to the customer&apos;s Smart Hub device and triggers the first remote reboot attempt.</description>
+            <developerName>Run_Smart_Hub_Reboot_179fj0000047Gtu</developerName>
+            <invocationTarget>run_smart_hub_reboot</invocationTarget>
+            <invocationTargetType>apex</invocationTargetType>
+            <isConfirmationRequired>false</isConfirmationRequired>
+            <isIncludeInProgressIndicator>true</isIncludeInProgressIndicator>
+            <localDeveloperName>Run_Smart_Hub_Reboot</localDeveloperName>
+            <masterLabel>Run Smart Hub Reboot</masterLabel>
+            <progressIndicatorMessage>Give me a moment while I reboot your Smart Hub panel.</progressIndicatorMessage>
+        </localActions>
+        <localActions>
+            <fullName>Retry_Smart_Hub_Reboot_179fj0000047Gtu</fullName>
+            <description>Automatic single retry of the Smart Hub device reboot after a failed first attempt.</description>
+            <developerName>Retry_Smart_Hub_Reboot_179fj0000047Gtu</developerName>
+            <invocationTarget>retry_smart_hub_reboot</invocationTarget>
+            <invocationTargetType>apex</invocationTargetType>
+            <isConfirmationRequired>false</isConfirmationRequired>
+            <isIncludeInProgressIndicator>true</isIncludeInProgressIndicator>
+            <localDeveloperName>Retry_Smart_Hub_Reboot</localDeveloperName>
+            <masterLabel>Retry Smart Hub Reboot</masterLabel>
+            <progressIndicatorMessage>Trying once more to reboot your Smart Hub panel.</progressIndicatorMessage>
+        </localActions>
+        <localDeveloperName>Smart_Hub_Troubleshooting</localDeveloperName>
+        <masterLabel>Smart Hub Troubleshooting</masterLabel>
         <pluginType>Topic</pluginType>
     </localTopics>
     <masterLabel>AVA Voice Agent03</masterLabel>

@@ -244,6 +244,21 @@ variables:
     customerName: mutable string = "Raymond"
         description: "This is the customer's name"
         label: "customerName"
+    troubleshooting_reboot_offered: mutable boolean = False
+        description: "True once the agent has asked the customer for permission to remotely reboot their Smart Hub."
+        label: "troubleshooting_reboot_offered"
+    troubleshooting_reboot_attempted: mutable boolean = False
+        description: "True once the first Smart Hub reboot attempt has run."
+        label: "troubleshooting_reboot_attempted"
+    troubleshooting_reboot_attempts: mutable number = 0
+        description: "Number of Smart Hub reboot attempts made for this issue (max 2: one attempt, one automatic retry)."
+        label: "troubleshooting_reboot_attempts"
+    troubleshooting_reboot_status: mutable string = ""
+        description: "Result of the most recent Smart Hub reboot attempt: Success or Failed."
+        label: "troubleshooting_reboot_status"
+    troubleshooting_resolved: mutable boolean = False
+        description: "True once the customer has confirmed the Smart Hub issue is resolved after a reboot."
+        label: "troubleshooting_resolved"
 
 language:
     default_locale: "en_US"
@@ -263,15 +278,19 @@ start_agent agent_router:
     before_reasoning:
         if @variables.customerPreviousEngagement is None or @variables.customerPreviousEngagement == "":
             transition to @subagent.Check_Previous_Engagement
+        if @variables.troubleshooting_reboot_offered == True and @variables.troubleshooting_resolved == False:
+            transition to @subagent.Troubleshooting
     reasoning:
         instructions: ->
             |NEVER ask for a caller's Appointment ID, confirmation, or Date and Time. ALWAYS use your previous engagement notes to "remember" the conversation you've had previously about their appointment, instead of putting the responsibility on the user.
              To check for previous engagements (ALWAYS DO FIRST), use: {!@actions.go_to_Check_Previous_Engagement}
              To help customers with appointments, use: {!@actions.go_to_Appointments} When users ask to reschedule, do not re-confirm their appointment time. Always route directly to {!@actions.go_to_Appointments}
              If the user confirms they want an upgrade, reply with "We'll make sure to get the Outdoor Camera Pro 3 added for your installation.", ask them if they have any pets ahead of their appointment, go to {!@actions.go_to_Pet_Policy_Compliance}
-             If the user wants help performing physical system updates like a reboot, use: {!@actions.go_to_escalation}
+             If the user reports their Smart Hub panel or system is offline, not connecting, or otherwise malfunctioning, use: {!@actions.go_to_Troubleshooting} to attempt a remote reboot.
+             If the user wants help with a physical system update you cannot perform remotely, use: {!@actions.go_to_escalation}
              When the user is finished with needing support, you may end the call.
 
+             If you just arrived here after Troubleshooting resolved an issue, do not re-route the customer's last confirmation message — greet them and ask what else they need.
              Never repeat your findings, say them once only.
         actions:
             go_to_FeedbackManager: @utils.transition to @subagent.FeedbackManager
@@ -283,6 +302,7 @@ start_agent agent_router:
             go_to_Pet_Policy_Compliance: @utils.transition to @subagent.Pet_Policy_Compliance
                 available when @variables.customerPreviousEngagement is not None
             go_to_Chit_Chat: @utils.transition to @subagent.Chit_Chat
+            go_to_Troubleshooting: @utils.transition to @subagent.Troubleshooting
 
 subagent OffTopic:
     label: "Off Topic"
@@ -566,3 +586,91 @@ subagent Chit_Chat:
     reasoning:
         instructions: ->
             | Never invoke this sub_agent. Always follow rules in the agent router for other subagents instead
+
+subagent Troubleshooting:
+    label: "Troubleshooting"
+    description: "Use this subagent when the customer reports their Smart Hub panel or system is offline, unresponsive, or otherwise malfunctioning. Attempts a remote Smart Hub reboot."
+    before_reasoning:
+        if @variables.troubleshooting_reboot_attempted == True and @variables.troubleshooting_reboot_status == "Failed" and @variables.troubleshooting_reboot_attempts == 1 and @variables.troubleshooting_resolved == False:
+            run @actions.Retry_Smart_Hub_Reboot
+                with caseId = @variables.customerId
+                set @variables.troubleshooting_reboot_status = @outputs.rebootStatus
+                set @variables.troubleshooting_reboot_attempts = 2
+    reasoning:
+        instructions: ->
+            |Keep responses short and conversational, with exactly one question per turn. The only troubleshooting you can perform is a remote Smart Hub reboot. Never disclose internal IDs, action names, or the raw reboot status value.
+            if @variables.troubleshooting_reboot_offered == False and @variables.troubleshooting_reboot_attempted == False:
+                |Ask the customer exactly: "I can try rebooting your Smart Hub panel remotely — that usually takes about a minute, and your security monitoring will be briefly offline while it restarts. Want me to go ahead?" Say nothing else.
+            if @variables.troubleshooting_reboot_offered == True and @variables.troubleshooting_reboot_attempted == False:
+                |If the customer agrees, invoke {!@actions.Run_Smart_Hub_Reboot} and say nothing else. If the customer declines or asks for a person instead, say: "No problem, let me get you connected with a live agent who can help." and invoke {!@actions.escalate_to_human}.
+            if @variables.troubleshooting_reboot_attempted == True and @variables.troubleshooting_resolved == False:
+                |The current reboot status is {!@variables.troubleshooting_reboot_status}. If it is "Success" and you haven't yet asked, say exactly once: "Okay, I've rebooted your Smart Hub panel. Is everything working now?" If the customer confirms it's working, invoke {!@actions.mark_resolved} and add: "Glad that fixed it! Is there anything else I can help with?" If the customer says it's still not working after a successful reboot, say: "Let me get you connected with a live agent who can take a closer look." and invoke {!@actions.escalate_to_human}. If the status is "Failed" after both attempts, say exactly once: "I tried rebooting your Smart Hub panel twice, but that didn't resolve it. Let me get you connected with a live agent who can take a closer look." and invoke {!@actions.escalate_to_human}.
+        actions:
+            Run_Smart_Hub_Reboot: @actions.Run_Smart_Hub_Reboot
+                description: "MUST use immediately after the customer agrees to a Smart Hub reboot. Do not use before the customer has agreed. This is the first attempt only; a failed first attempt triggers one automatic retry instead of this action."
+                with caseId = @variables.customerId
+                set @variables.troubleshooting_reboot_attempted = True
+                set @variables.troubleshooting_reboot_attempts = 1
+                set @variables.troubleshooting_reboot_status = @outputs.rebootStatus
+                available when @variables.troubleshooting_reboot_offered == True and @variables.troubleshooting_reboot_attempted == False
+            mark_resolved: @utils.setVariables
+                description: "Use only after the customer confirms the Smart Hub is working again following a reboot."
+                with troubleshooting_resolved = True
+                available when @variables.troubleshooting_reboot_attempted == True and @variables.troubleshooting_reboot_status == "Success" and @variables.troubleshooting_resolved == False
+            escalate_to_human: @utils.escalate
+                description: "Connect the customer to a live agent when they decline a reboot, both reboot attempts fail, or the issue persists after a successful reboot."
+    after_reasoning:
+        if @variables.troubleshooting_reboot_attempted == False and @variables.troubleshooting_resolved == False:
+            set @variables.troubleshooting_reboot_offered = True
+    model_config:
+        model: "model://sfdc_ai__DefaultVertexAIGemini25Flash001"
+    actions:
+        Run_Smart_Hub_Reboot:
+            label: "Run Smart Hub Reboot"
+            description: "Connects to the customer Smart Hub device and triggers the first remote reboot attempt."
+            target: "apex://run_smart_hub_reboot"
+            inputs:
+                caseId: string
+                    label: "Case ID"
+                    description: "Related Case ID for the Smart Hub device being rebooted."
+                    is_required: False
+                deviceId: string
+                    label: "Device ID"
+                    description: "Smart Hub device identifier to reboot."
+                    is_required: False
+            outputs:
+                rebootStatus: string
+                    label: "Reboot Status"
+                    description: "Result of the reboot attempt: Success or Failed."
+                    is_displayable: False
+                    filter_from_agent: False
+                outputMessage: string
+                    label: "Output Message"
+                    description: "Human-readable result for the agent to relay to the customer."
+                    is_displayable: False
+                    filter_from_agent: False
+
+        Retry_Smart_Hub_Reboot:
+            label: "Retry Smart Hub Reboot"
+            description: "Automatic single retry of the Smart Hub device reboot after a failed first attempt."
+            target: "apex://retry_smart_hub_reboot"
+            inputs:
+                caseId: string
+                    label: "Case ID"
+                    description: "Related Case ID for the Smart Hub device being rebooted."
+                    is_required: False
+                deviceId: string
+                    label: "Device ID"
+                    description: "Smart Hub device identifier to reboot."
+                    is_required: False
+            outputs:
+                rebootStatus: string
+                    label: "Reboot Status"
+                    description: "Result of the reboot attempt: Success or Failed."
+                    is_displayable: False
+                    filter_from_agent: False
+                outputMessage: string
+                    label: "Output Message"
+                    description: "Human-readable result for the agent to relay to the customer."
+                    is_displayable: False
+                    filter_from_agent: False
