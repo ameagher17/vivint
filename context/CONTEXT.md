@@ -67,6 +67,8 @@ What happened and the fix, in short:
 
 Added to `AVA_Voice_Agent2` (see `agent/AVA_Voice_Agent2.agent`, `subagent Troubleshooting:`).
 
+> For the plain-language, customer-facing walkthrough of this flow (offer → reboot → automatic retry → resolution check → escalation, plus the guardrails), see **[`agent/TROUBLESHOOTING_SUBAGENT.md`](agent/TROUBLESHOOTING_SUBAGENT.md)**. The notes below are the implementation-level detail.
+
 **Behavior:** when the customer reports their Smart Hub panel/system is offline or malfunctioning, the agent offers a remote reboot, runs it, and handles retry/escalation:
 1. Ask permission once (exact scripted line — reboot takes ~1 min, security monitoring briefly offline).
 2. On agreement, run `Run_Smart_Hub_Reboot` (Apex `run_smart_hub_reboot` via `InvocableSmartHubDeviceReboot`). On decline, escalate to a human.
