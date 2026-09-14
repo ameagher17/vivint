@@ -6,6 +6,7 @@ Analytics dashboard seeding, the Troubleshooting (Smart Hub reboot) subagent, an
 its test suites.
 
 - **[`context/CONTEXT.md`](context/CONTEXT.md)** — start here. Narrative summary of the org migration, dashboard seeding gotchas, the agent-renaming trap, the Troubleshooting subagent design, and the test suites.
+- **[`context/agent/TROUBLESHOOTING_SUBAGENT.md`](context/agent/TROUBLESHOOTING_SUBAGENT.md)** — what the Smart Hub Troubleshooting subagent does, end to end: the offer, the reboot, the one automatic retry, the resolution check, and the escalation paths.
 - **`context/agent/`, `context/apex/`, `context/tests/`, `context/safety/`** — quick-reference copies of the key artifacts described in `CONTEXT.md`.
 - **`salesforce/`** — the full SFDX project (metadata, Apex, LWC, the `observability/` Data Cloud seeding scripts). This is the live/working project; edit here going forward.
 
