@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<AiEvaluationDefinition xmlns="http://soap.sforce.com/2006/04/metadata">
+    <name>AVA Voice Agent 2 - Smart Hub Troubleshooting Test Suite</name>
+    <subjectName>AVA_Voice_Agent2</subjectName>
+    <subjectType>AGENT</subjectType>
+    <testCase>
+        <expectation>
+            <expectedValue>Troubleshooting</expectedValue>
+            <name>topic_assertion</name>
+        </expectation>
+        <expectation>
+            <expectedValue>[]</expectedValue>
+            <name>actions_assertion</name>
+        </expectation>
+        <expectation>
+            <expectedValue>Agent asks permission to remotely reboot the Smart Hub panel using the scripted line (reboot takes about a minute, security monitoring briefly offline), without disclosing internal IDs or action names.</expectedValue>
+            <name>output_validation</name>
+        </expectation>
+        <inputs>
+            <utterance>My Smart Hub keeps going offline and won&apos;t connect to the app.</utterance>
+        </inputs>
+        <number>1</number>
+    </testCase>
+    <testCase>
+        <expectation>
+            <expectedValue>Troubleshooting</expectedValue>
+            <name>topic_assertion</name>
+        </expectation>
+        <expectation>
+            <expectedValue>[&apos;escalate_to_human&apos;]</expectedValue>
+            <name>actions_assertion</name>
+        </expectation>
+        <expectation>
+            <expectedValue>Agent acknowledges the decline and escalates the customer to a live agent.</expectedValue>
+            <name>output_validation</name>
+        </expectation>
+        <inputs>
+            <utterance>No thanks, I&apos;d rather talk to a person.</utterance>
+        </inputs>
+        <number>2</number>
+    </testCase>
+    <testCase>
+        <expectation>
+            <expectedValue>Troubleshooting</expectedValue>
+            <name>topic_assertion</name>
+        </expectation>
+        <expectation>
+            <expectedValue>[&apos;Run_Smart_Hub_Reboot&apos;]</expectedValue>
+            <name>actions_assertion</name>
+        </expectation>
+        <expectation>
+            <expectedValue>Agent invokes the Smart Hub reboot action immediately without asking further questions.</expectedValue>
+            <name>output_validation</name>
+        </expectation>
+        <inputs>
+            <utterance>Yes, go ahead and reboot it.</utterance>
+        </inputs>
+        <number>3</number>
+    </testCase>
+    <testCase>
+        <expectation>
+            <expectedValue>Troubleshooting</expectedValue>
+            <name>topic_assertion</name>
+        </expectation>
+        <expectation>
+            <expectedValue>[&apos;escalate_to_human&apos;]</expectedValue>
+            <name>actions_assertion</name>
+        </expectation>
+        <expectation>
+            <expectedValue>Agent escalates the customer to a live agent since the issue persists after a successful reboot, without exposing internal status values.</expectedValue>
+            <name>output_validation</name>
+        </expectation>
+        <inputs>
+            <utterance>It rebooted but my Smart Hub is still not connecting.</utterance>
+        </inputs>
+        <number>4</number>
+    </testCase>
+    <testCase>
+        <expectation>
+            <expectedValue>Troubleshooting</expectedValue>
+            <name>topic_assertion</name>
+        </expectation>
+        <expectation>
+            <expectedValue>[&apos;escalate_to_human&apos;]</expectedValue>
+            <name>actions_assertion</name>
+        </expectation>
+        <expectation>
+            <expectedValue>Agent automatically triggers the one allowed retry; when the retry also fails, the agent tells the customer both attempts failed and escalates to a live agent without disclosing internal status values or action names.</expectedValue>
+            <name>output_validation</name>
+        </expectation>
+        <inputs>
+            <utterance>That didn&apos;t fix it, can you try rebooting it again?</utterance>
+        </inputs>
+        <number>5</number>
+    </testCase>
+    <testCase>
+        <expectation>
+            <expectedValue>Troubleshooting</expectedValue>
+            <name>topic_assertion</name>
+        </expectation>
+        <expectation>
+            <expectedValue>[]</expectedValue>
+            <name>actions_assertion</name>
+        </expectation>
+        <expectation>
+            <expectedValue>Agent asks permission to remotely reboot the Smart Hub Pro 2 panel using the same scripted permission line, without disclosing internal IDs or action names.</expectedValue>
+            <name>output_validation</name>
+        </expectation>
+        <inputs>
+            <utterance>My Smart Hub Pro 2 keeps dropping offline and won&apos;t stay connected.</utterance>
+        </inputs>
+        <number>6</number>
+    </testCase>
+    <testCase>
+        <expectation>
+            <expectedValue>Troubleshooting</expectedValue>
+            <name>topic_assertion</name>
+        </expectation>
+        <expectation>
+            <expectedValue>[]</expectedValue>
+            <name>actions_assertion</name>
+        </expectation>
+        <expectation>
+            <expectedValue>Agent treats this as a Smart Hub malfunction and asks permission to remotely reboot the panel, since a remote reboot is the only troubleshooting step it can perform.</expectedValue>
+            <name>output_validation</name>
+        </expectation>
+        <inputs>
+            <utterance>I think my Smart Hub&apos;s firmware needs updating, it hasn&apos;t updated in a while.</utterance>
+        </inputs>
+        <number>7</number>
+    </testCase>
+    <testCase>
+        <expectation>
+            <expectedValue>Troubleshooting</expectedValue>
+            <name>topic_assertion</name>
+        </expectation>
+        <expectation>
+            <expectedValue>[&apos;Run_Smart_Hub_Reboot&apos;]</expectedValue>
+            <name>actions_assertion</name>
+        </expectation>
+        <expectation>
+            <expectedValue>Following the customer&apos;s agreement in the prior turn, the agent invokes the Smart Hub reboot action immediately and says nothing else.</expectedValue>
+            <name>output_validation</name>
+        </expectation>
+        <inputs>
+            <utterance>Okay, go ahead and reboot it now.</utterance>
+        </inputs>
+        <number>8</number>
+    </testCase>
+    <testCase>
+        <expectation>
+            <expectedValue>Troubleshooting</expectedValue>
+            <name>topic_assertion</name>
+        </expectation>
+        <expectation>
+            <expectedValue>[]</expectedValue>
+            <name>actions_assertion</name>
+        </expectation>
+        <expectation>
+            <expectedValue>Agent asks permission to remotely reboot the Smart Hub Pro 2 panel using the scripted permission line, without disclosing internal IDs or action names.</expectedValue>
+            <name>output_validation</name>
+        </expectation>
+        <inputs>
+            <utterance>My Smart Hub Pro 2 says it has a firmware update pending but it never finishes.</utterance>
+        </inputs>
+        <number>9</number>
+    </testCase>
+    <testCase>
+        <expectation>
+            <expectedValue>Troubleshooting</expectedValue>
+            <name>topic_assertion</name>
+        </expectation>
+        <expectation>
+            <expectedValue>[&apos;Run_Smart_Hub_Reboot&apos;]</expectedValue>
+            <name>actions_assertion</name>
+        </expectation>
+        <expectation>
+            <expectedValue>Following the customer&apos;s agreement in the prior turn, the agent invokes the Smart Hub reboot action immediately and says nothing else.</expectedValue>
+            <name>output_validation</name>
+        </expectation>
+        <inputs>
+            <utterance>Yes, please reboot my Smart Hub Pro 2.</utterance>
+        </inputs>
+        <number>10</number>
+    </testCase>
+</AiEvaluationDefinition>

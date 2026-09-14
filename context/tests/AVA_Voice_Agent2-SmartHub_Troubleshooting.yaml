@@ -1,0 +1,80 @@
+name: "AVA Voice Agent 2 - Smart Hub Troubleshooting Test Suite"
+subjectType: AGENT
+subjectName: AVA_Voice_Agent2
+
+# Scope: Troubleshooting subagent only. Products under test are limited to the
+# Smart Hub and Smart Hub Pro 2 (no other devices). Cases 7-10 are two
+# firmware-then-reboot scenarios, each modeled as a sequential Turn 1 / Turn 2
+# pair (the firmware mention and the reboot request are always separate user
+# turns, never combined into a single utterance).
+
+testCases:
+  # --- Core Smart Hub reboot flow ---
+  - name: "Smart Hub offline - initial report"
+    utterance: "My Smart Hub keeps going offline and won't connect to the app."
+    expectedTopic: Troubleshooting
+    expectedActions: []
+    expectedOutcome: "Agent asks permission to remotely reboot the Smart Hub panel using the scripted line (reboot takes about a minute, security monitoring briefly offline), without disclosing internal IDs or action names."
+
+  - name: "Smart Hub reboot declined"
+    utterance: "No thanks, I'd rather talk to a person."
+    expectedTopic: Troubleshooting
+    expectedActions:
+      - escalate_to_human
+    expectedOutcome: "Agent acknowledges the decline and escalates the customer to a live agent."
+
+  - name: "Smart Hub reboot succeeds, customer confirms fixed"
+    utterance: "Yes, go ahead and reboot it." # (customer previously agreed; reboot ran and succeeded)
+    expectedTopic: Troubleshooting
+    expectedActions:
+      - Run_Smart_Hub_Reboot
+    expectedOutcome: "Agent invokes the Smart Hub reboot action immediately without asking further questions."
+
+  - name: "Smart Hub reboot succeeds, issue persists"
+    utterance: "It rebooted but my Smart Hub is still not connecting."
+    expectedTopic: Troubleshooting
+    expectedActions:
+      - escalate_to_human
+    expectedOutcome: "Agent escalates the customer to a live agent since the issue persists after a successful reboot, without exposing internal status values."
+
+  - name: "Smart Hub both reboot attempts fail"
+    utterance: "That didn't fix it, can you try rebooting it again?"
+    expectedTopic: Troubleshooting
+    expectedActions:
+      - escalate_to_human
+    expectedOutcome: "Agent automatically triggers the one allowed retry; when the retry also fails, the agent tells the customer both attempts failed and escalates to a live agent without disclosing internal status values or action names."
+
+  # --- Smart Hub Pro 2 coverage ---
+  - name: "Smart Hub Pro 2 offline - initial report"
+    utterance: "My Smart Hub Pro 2 keeps dropping offline and won't stay connected."
+    expectedTopic: Troubleshooting
+    expectedActions: []
+    expectedOutcome: "Agent asks permission to remotely reboot the Smart Hub Pro 2 panel using the same scripted permission line, without disclosing internal IDs or action names."
+
+  # --- Firmware-then-reboot sequence, iteration 1: Smart Hub (two sequential turns) ---
+  - name: "Firmware sequence 1 / Turn 1 (Smart Hub) - firmware mention"
+    utterance: "I think my Smart Hub's firmware needs updating, it hasn't updated in a while."
+    expectedTopic: Troubleshooting
+    expectedActions: []
+    expectedOutcome: "Agent treats this as a Smart Hub malfunction and asks permission to remotely reboot the panel, since a remote reboot is the only troubleshooting step it can perform."
+
+  - name: "Firmware sequence 1 / Turn 2 (Smart Hub) - follow-up reboot request"
+    utterance: "Okay, go ahead and reboot it now."
+    expectedTopic: Troubleshooting
+    expectedActions:
+      - Run_Smart_Hub_Reboot
+    expectedOutcome: "Following the customer's agreement in the prior turn, the agent invokes the Smart Hub reboot action immediately and says nothing else."
+
+  # --- Firmware-then-reboot sequence, iteration 2: Smart Hub Pro 2 (two sequential turns) ---
+  - name: "Firmware sequence 2 / Turn 1 (Smart Hub Pro 2) - firmware mention"
+    utterance: "My Smart Hub Pro 2 says it has a firmware update pending but it never finishes."
+    expectedTopic: Troubleshooting
+    expectedActions: []
+    expectedOutcome: "Agent asks permission to remotely reboot the Smart Hub Pro 2 panel using the scripted permission line, without disclosing internal IDs or action names."
+
+  - name: "Firmware sequence 2 / Turn 2 (Smart Hub Pro 2) - follow-up reboot request"
+    utterance: "Yes, please reboot my Smart Hub Pro 2."
+    expectedTopic: Troubleshooting
+    expectedActions:
+      - Run_Smart_Hub_Reboot
+    expectedOutcome: "Following the customer's agreement in the prior turn, the agent invokes the Smart Hub reboot action immediately and says nothing else."
