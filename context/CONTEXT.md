@@ -87,13 +87,27 @@ Guardrail baked into the reasoning instructions: never disclose internal IDs, ac
 
 ## 5. Test suites written against AVA_Voice_Agent2
 
-Two parallel test artifacts exist for the firmware/troubleshooting flow — **note they're not fully in sync with the subagent above**, see discrepancy note below.
+**Current suite:** **`tests/AVA_Voice_Agent2-troubleshooting.yaml`** — 18-case Testing Center
+spec for the Smart Hub Troubleshooting subagent, written against the live `.agent` file
+(`salesforce/tests/` is the editable copy; `context/tests/` mirrors it). Covers routing +
+scripted offer, the consent gate, first-attempt success, decline → escalate, the resolution
+check (resolved / still-broken), the automatic retry, both-attempts-fail escalation, the
+2-attempt cap, router hand-back after resolution, and 5 guardrail cases. Deterministic
+branch control comes from the reboot Apex's `caseId` markers (`TEST_FORCE_REBOOT_FAIL_ONCE`,
+`TEST_FORCE_REBOOT_ALWAYS_FAIL`), seeded through `customerId`; mid-flow cases seed the
+`troubleshooting_*` variables via `contextVariables` because `conversationHistory` does not
+restore state and the actions are gated on it. Not yet executed — needs
+`sf agent test create` + `sf agent test run` against `vivint_observability`.
+
+The two older artifacts below are the **superseded** firmware-era versions — **not in sync
+with the subagent above**, see discrepancy note.
 
 - **`tests/Quick_Agentforce_Service_Agent-firmware-troubleshooting.yaml`** — human-readable test case spec (5 utterances: firmware update request, direct reboot request, "still not working" escalation, off-topic deflection, prompt-injection resistance).
 - **`tests/AVA_Firmware_Troubleshooting.aiEvaluationDefinition-meta.xml`** — the same 5 cases as a deployable `AiEvaluationDefinition` (per-case `topic_assertion` / `actions_assertion` / `output_validation` expectations), runnable via `sf agent test run` / `sf agent test results` against the org.
 - **`safety/NIST_Adversarial_Safety-testSpec.md`** — copy of the `nist-adversarial-safety-test` skill spec (six hard blocks: system-prompt disclosure, prompt-injection, unsolicited PII, sensitive-data egress, safety-classifier override, protected-category refusal). Use the `nist-adversarial-safety-test` skill to actually run this against the agent and get a SAFE/NEEDS_REVIEW/UNSAFE verdict.
 
-**Discrepancy to resolve next session:** both test files target `subjectName: Quick_Agentforce_Service_Agent` and assert `expectedTopic: Firmware_Updates` — but the live `.agent` file's subagent is named `Troubleshooting` (Smart Hub reboot), not `Firmware_Updates`, and the current design routes reboot failures to `escalate_to_human` directly rather than the test's `Go_to_Escalation` action name. These test files likely predate the current `Troubleshooting` subagent implementation (or were drafted against an earlier/planned topic name) and need to be updated to match: rename `subjectName`/topic references to the real agent (`AVA_Voice_Agent2`) and subagent (`Troubleshooting`), and align action names (`escalate_to_human`) and expected outcomes with the actual scripted reboot/retry/escalate flow in §4 before re-running `sf agent test run`.
+**Discrepancy (resolved by the new suite above; the two old files are left in place as
+history and should not be run):** both old test files target `subjectName: Quick_Agentforce_Service_Agent` and assert `expectedTopic: Firmware_Updates` — but the live `.agent` file's subagent is named `Troubleshooting` (Smart Hub reboot), not `Firmware_Updates`, and the current design routes reboot failures to `escalate_to_human` directly rather than the test's `Go_to_Escalation` action name. These test files likely predate the current `Troubleshooting` subagent implementation (or were drafted against an earlier/planned topic name) and need to be updated to match: rename `subjectName`/topic references to the real agent (`AVA_Voice_Agent2`) and subagent (`Troubleshooting`), and align action names (`escalate_to_human`) and expected outcomes with the actual scripted reboot/retry/escalate flow in §4 before re-running `sf agent test run`.
 
 ## Where things live
 
