@@ -1,0 +1,29 @@
+{
+  "required" : [ "feedbackResponse" ],
+  "unevaluatedProperties" : false,
+  "properties" : {
+    "conversationId" : {
+      "title" : "Conversation ID",
+      "description" : "The unique ID of the conversation for which feedback is being recorded. This ID starts with '0dw'.",
+      "lightning:type" : "lightning__textType",
+      "lightning:isPII" : false,
+      "copilotAction:isUserInput" : false
+    },
+    "voiceCallId" : {
+      "title" : "Voice Call Id",
+      "description" : "The unique ID of the voice call for which feedback is being recorded. This ID starts with '0LQ'.",
+      "lightning:type" : "lightning__textType",
+      "lightning:isPII" : false,
+      "copilotAction:isUserInput" : false
+    },
+    "feedbackResponse" : {
+      "title" : "Feedback Response",
+      "description" : "The user's feedback is true if the issue was resolved, false if it was not resolved.",
+      "lightning:type" : "lightning__booleanType",
+      "lightning:isPII" : false,
+      "copilotAction:isUserInput" : false
+    }
+  },
+  "lightning:type" : "lightning__objectType",
+  "lightning:textIndexed" : true
+}

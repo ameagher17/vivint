@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CorsWhitelistOrigin xmlns="http://soap.sforce.com/2006/04/metadata">
+    <urlPattern>https://trailsignup-d359dd0f913e65--c.vf.force.com</urlPattern>
+</CorsWhitelistOrigin>

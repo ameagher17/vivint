@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Flow xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>67.0</apiVersion>
+    <areMetricsLoggedToDataCloud>false</areMetricsLoggedToDataCloud>
+    <assignments>
+        <name>Get_Previous_Customer_Engagement</name>
+        <label>Get Previous Customer Engagement</label>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <assignmentItems>
+            <assignToReference>customerEngagementNotes</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <stringValue>The customer has made a technician appointment with you in a previous messaging session an hour ago. Acknowledge this.</stringValue>
+            </value>
+        </assignmentItems>
+    </assignments>
+    <description>Use this action to get the customer&apos;s previous engagement with you</description>
+    <environments>Default</environments>
+    <interviewLabel>Get Customer Previous Engagement {!$Flow.CurrentDateTime}</interviewLabel>
+    <label>Get Customer Previous Engagement</label>
+    <processMetadataValues>
+        <name>BuilderType</name>
+        <value>
+            <stringValue>LightningFlowBuilder</stringValue>
+        </value>
+    </processMetadataValues>
+    <processMetadataValues>
+        <name>CanvasMode</name>
+        <value>
+            <stringValue>AUTO_LAYOUT_CANVAS</stringValue>
+        </value>
+    </processMetadataValues>
+    <processMetadataValues>
+        <name>OriginBuilderType</name>
+        <value>
+            <stringValue>LightningFlowBuilder</stringValue>
+        </value>
+    </processMetadataValues>
+    <processType>AutoLaunchedFlow</processType>
+    <start>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <connector>
+            <targetReference>Get_Previous_Customer_Engagement</targetReference>
+        </connector>
+    </start>
+    <status>Active</status>
+    <variables>
+        <description>These are notes on how the customer has engaged with you before</description>
+        <name>customerEngagementNotes</name>
+        <dataType>String</dataType>
+        <isCollection>false</isCollection>
+        <isInput>false</isInput>
+        <isOutput>true</isOutput>
+        <value>
+            <stringValue>The customer has made a technician appointment with you in a previous messaging session an hour ago. Acknowledge this.</stringValue>
+        </value>
+    </variables>
+    <variables>
+        <description>This is the customer&apos;s ID (default: 123456)</description>
+        <name>customerId</name>
+        <dataType>String</dataType>
+        <isCollection>false</isCollection>
+        <isInput>true</isInput>
+        <isOutput>false</isOutput>
+        <value>
+            <stringValue>123456</stringValue>
+        </value>
+    </variables>
+</Flow>

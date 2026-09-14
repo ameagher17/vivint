@@ -1,0 +1,83 @@
+<apex:page controller="CSATNotificationController" title="CSAT Notification">
+    <apex:form >
+        <apex:pageBlock title="CSAT Alert">
+            <apex:pageMessages />
+            <apex:pageBlockButtons location="bottom">
+                <apex:commandButton value="CSAT notification" action="{!sendNotification}"/>
+                <apex:commandButton value="Add 5 notifications" action="{!addFiveNotifications}"/>
+                <apex:commandButton value="Clear notifications" onclick="clearNotifications(); return false;"/>
+            </apex:pageBlockButtons>
+            <p>"CSAT notification" sends the "CSAT Increase Detected" alert.
+               "Add 5 notifications" fires the follow-based demo set (kept as backup).
+               "Clear notifications" runs in your live browser session and marks every bell
+               notification read + seen (clearing the red badge). Salesforce's API cannot
+               delete notifications, so entries remain in the tray as read and age out over
+               time &mdash; watch the status line below, then hard-refresh the bell tab.</p>
+            <div id="clearStatus"
+                 style="margin-top:10px;font-family:monospace;font-size:12px;color:#333;"></div>
+        </apex:pageBlock>
+    </apex:form>
+
+    <script type="text/javascript">
+        // Live-session session id + instance URL (parsed from the partner server URL).
+        var SID = '{!$Api.Session_ID}';
+        var PURL = '{!$Api.Partner_Server_URL_260}';
+        var INSTANCE = PURL.substring(0, PURL.indexOf('/services'));
+        var API = '/services/data/v60.0/connect/notifications';
+
+        function clrLog(msg) {
+            var d = document.getElementById('clearStatus');
+            d.innerHTML += msg + '<br/>';
+        }
+
+        function jstat(items) {
+            var unread = items.filter(function (n) { return !n.read; }).length;
+            var unseen = items.filter(function (n) { return !n.seen; }).length;
+            return 'total ' + items.length + ', unread ' + unread + ', unseen ' + unseen;
+        }
+
+        async function getList() {
+            var r = await fetch(INSTANCE + API + '?size=100', {
+                method: 'GET', mode: 'cors',
+                headers: { 'Authorization': 'Bearer ' + SID, 'Accept': 'application/json' }
+            });
+            var data = r.ok ? await r.json() : { notifications: [] };
+            return { status: r.status, items: (data && data.notifications) ? data.notifications : [] };
+        }
+
+        // Salesforce's Connect Notifications API supports GET, HEAD and PATCH only —
+        // DELETE returns 405, so bell notifications CANNOT be removed programmatically.
+        // The most we can do is mark them all read + seen, which clears the red badge
+        // and stops them from appearing "new." They remain in the tray as read entries
+        // and age out over time.
+        async function clearNotifications() {
+            var d = document.getElementById('clearStatus');
+            d.innerHTML = '';
+            clrLog('Reading notifications…');
+            try {
+                var before = await getList();
+                clrLog('Before → ' + jstat(before.items));
+                if (!before.items.length) { clrLog('Nothing to clear.'); return; }
+
+                var ok = 0, bad = 0;
+                for (var i = 0; i < before.items.length; i++) {
+                    var pr = await fetch(INSTANCE + API + '/' + before.items[i].id, {
+                        method: 'PATCH', mode: 'cors',
+                        headers: { 'Authorization': 'Bearer ' + SID, 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ read: true, seen: true })
+                    });
+                    if (pr.ok) { ok++; } else { bad++; }
+                }
+                clrLog('Marked read + seen: ok ' + ok + ', fail ' + bad);
+
+                var after = await getList();
+                clrLog('After → ' + jstat(after.items));
+                clrLog('Badge cleared (unread/unseen → 0). Note: the API cannot delete ' +
+                       'notifications, so they stay in the tray as read and age out over ' +
+                       'time. Hard-refresh (Cmd/Ctrl+R) the bell tab to update it.');
+            } catch (e) {
+                clrLog('ERROR: ' + e.message);
+            }
+        }
+    </script>
+</apex:page>
